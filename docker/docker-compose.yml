@@ -1,0 +1,12 @@
+version: '3.2'
+services:
+
+  postgresql:
+    image: postgres:12-alpine
+    container_name: 'infinum-task-postgres'
+    environment:
+      POSTGRES_USER: 'infinum'
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_DB: 'infinum_task'
+    ports:
+      - "5432:5432"
