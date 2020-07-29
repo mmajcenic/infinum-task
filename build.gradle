@@ -1,0 +1,43 @@
+plugins {
+	id 'org.springframework.boot' version '2.3.2.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+group = 'hr.infinum.task'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+def springfox_version = "3.0.0"
+
+dependencies {
+
+	implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+	implementation "org.springframework.boot:spring-boot-starter-security"
+	implementation "org.springframework.boot:spring-boot-starter-web"
+	implementation "org.apache.camel.springboot:camel-spring-boot-starter:3.4.1"
+	implementation "org.flywaydb:flyway-core"
+	implementation "org.postgresql:postgresql"
+	implementation "org.apache.commons:commons-lang3:3.11"
+	implementation "io.springfox:springfox-swagger2:$springfox_version"
+	implementation "io.springfox:springfox-swagger-ui:${springfox_version}"
+	implementation "io.springfox:springfox-bean-validators:${springfox_version}"
+	compileOnly "org.projectlombok:lombok"
+	developmentOnly "org.springframework.boot:spring-boot-devtools"
+	annotationProcessor "org.projectlombok:lombok"
+	testImplementation("org.springframework.boot:spring-boot-starter-test") {
+		exclude group: "org.junit.vintage", module: "junit-vintage-engine"
+	}
+	testImplementation "org.springframework.security:spring-security-test"
+	testImplementation "org.springframework.cloud:spring-cloud-starter:2.2.3.RELEASE"
+	testImplementation "com.playtika.testcontainers:embedded-postgresql:1.79"
+}
+
+test {
+	useJUnitPlatform()
+}
+
