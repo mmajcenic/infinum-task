@@ -44,9 +44,11 @@ public class UserServiceTest {
   @Autowired
   private CityService cityService;
 
+  private City city;
+
   @BeforeAll
   public void setup() {
-    cityService.create(City.builder()
+    this.city = cityService.create(City.builder()
         .name(CITY_NAME)
         .description("A mythical city")
         .population(1000)
@@ -93,7 +95,7 @@ public class UserServiceTest {
               .password("password")
               .build());
           setMocks(user);
-          userService.addFavouriteCity(CITY_NAME);
+          userService.addFavouriteCity(city);
         }));
 
     executorService.shutdown();
