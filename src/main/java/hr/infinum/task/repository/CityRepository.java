@@ -16,8 +16,8 @@ public interface CityRepository extends JpaRepository<City, Long> {
 
   List<City> findAllByOrderByFavouriteCountDesc();
 
-//  @Lock(LockModeType.PESSIMISTIC_WRITE)
-//  @QueryHints({@QueryHint(name = "javax.persistence.lock.timeout", value = "5000")})
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @QueryHints({@QueryHint(name = "javax.persistence.lock.timeout", value = "5000")})
   City findByNameIgnoreCase(String name);
 
 }
