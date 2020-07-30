@@ -3,3 +3,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/infinum_task
     username: infinum
     password: password
+
+  jpa:
+    show-sql: true

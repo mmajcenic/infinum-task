@@ -1,10 +1,10 @@
 package hr.infinum.task.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -59,7 +59,7 @@ public class User implements ApplicationEntity, UserDetails {
   @JoinTable(name = "user_favourite_city",
       joinColumns = @JoinColumn(name = "application_user_id"),
       inverseJoinColumns = @JoinColumn(name = "city_id"))
-  private Set<City> favouriteCities = new HashSet<>();
+  private List<City> favouriteCities = new ArrayList<>();
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @CreatedDate
@@ -69,8 +69,8 @@ public class User implements ApplicationEntity, UserDetails {
   @LastModifiedDate
   private LocalDateTime lastModifiedAt;
 
-  public Set<City> getFavouriteCities() {
-    return Collections.unmodifiableSet(favouriteCities);
+  public List<City> getFavouriteCities() {
+    return Collections.unmodifiableList(favouriteCities);
   }
 
   public boolean hasFavouriteCity(final City city) {
@@ -114,4 +114,5 @@ public class User implements ApplicationEntity, UserDetails {
   public boolean isEnabled() {
     return true;
   }
+
 }
