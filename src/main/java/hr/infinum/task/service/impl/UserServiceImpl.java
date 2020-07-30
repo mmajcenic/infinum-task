@@ -46,12 +46,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public List<City> removeFavouriteCity(final City city) {
-    final var user = getUserFromSecurityContext();
-    if (!user.hasFavouriteCity(city)) {
-      throw new CityNotFavouredException(city);
-    }
-    user.removeFavouriteCity(cityService.decrementFavouriteCount(city));
-    return repository.save(user).getFavouriteCities();
+    return internalRemoveFavouriteCity(findAndLockCity(city));
   }
 
   private List<City> internalAddFavouriteCity(final City city) {
@@ -60,6 +55,15 @@ public class UserServiceImpl implements UserService {
       throw new CityAlreadyFavouredException(city);
     }
     user.addFavouriteCity(cityService.incrementFavouriteCount(city));
+    return repository.save(user).getFavouriteCities();
+  }
+
+  private List<City> internalRemoveFavouriteCity(final City city) {
+    final var user = getUserFromSecurityContext();
+    if (!user.hasFavouriteCity(city)) {
+      throw new CityNotFavouredException(city);
+    }
+    user.removeFavouriteCity(cityService.decrementFavouriteCount(city));
     return repository.save(user).getFavouriteCities();
   }
 
