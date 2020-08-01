@@ -7,7 +7,11 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,25 +27,28 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 @Table(name = "city")
-public class City implements hr.infinum.task.model.ApplicationEntity {
+public class City implements ApplicationEntity {
 
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id
   @Column(name = "id")
   private Long id;
 
-  @Column(name = "name")
+  @NotEmpty(message = "Name is required")
+  @Column(name = "name", nullable = false, unique = true)
   private String name;
 
-  @Column(name = "description")
+  @NotEmpty(message = "Description is required")
+  @Column(name = "description", nullable = false)
   private String description;
 
-  @Column(name = "population")
+  @PositiveOrZero(message = "Population must not be negative")
+  @NotNull(message = "Population is required")
+  @Column(name = "population", nullable = false)
   private Integer population;
 
-  @Builder.Default
-  @Column(name = "favourite_count")
-  private Integer favouriteCount = 0;
+  @Column(name = "favourite_count", nullable = false)
+  private Integer favouriteCount;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @CreatedDate
@@ -57,6 +64,13 @@ public class City implements hr.infinum.task.model.ApplicationEntity {
 
   public void decrementFavouriteCount() {
     favouriteCount--;
+  }
+
+  @PrePersist
+  public void onPrePersist() {
+    if (favouriteCount == null) {
+      setFavouriteCount(0);
+    }
   }
 
 }

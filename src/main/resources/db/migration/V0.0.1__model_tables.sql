@@ -13,7 +13,7 @@ CREATE TABLE city (
 	name                                 TEXT NOT NULL UNIQUE,
 	description                          TEXT NOT NULL,
 	population                           INTEGER NOT NULL,
-    favourite_count                      INTEGER DEFAULT 0,
+    favourite_count                      INTEGER DEFAULT 0 NOT NULL,
     created_at                           TIMESTAMP WITH TIME ZONE NOT NULL,
     last_modified_at                     TIMESTAMP WITH TIME ZONE NOT NULL
 );

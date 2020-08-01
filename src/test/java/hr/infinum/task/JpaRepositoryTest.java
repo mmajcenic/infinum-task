@@ -16,7 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @TestInstance(Lifecycle.PER_CLASS)
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class RepositoryTest {
+public class JpaRepositoryTest {
 
   @Autowired
   private CityRepository cityRepository;

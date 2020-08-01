@@ -5,6 +5,7 @@ import hr.infinum.task.exception.CityNotFavouredException;
 import hr.infinum.task.model.City;
 import hr.infinum.task.model.User;
 import hr.infinum.task.repository.UserRepository;
+import hr.infinum.task.security.TokenAuthenticatedUser;
 import hr.infinum.task.service.CityService;
 import hr.infinum.task.service.UserService;
 import java.util.concurrent.Executors;
@@ -21,19 +22,18 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 @TestInstance(Lifecycle.PER_CLASS)
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserServiceTest {
 
   private static final String EMAIL = "test@test.hr";
-
-  private static final String CITY_NAME = "Camelot";
 
   @Autowired
   private UserService userService;
@@ -44,15 +44,15 @@ public class UserServiceTest {
   @Autowired
   private CityService cityService;
 
-  private City city;
+  private Long cityId;
 
   @BeforeAll
   public void setup() {
-    this.city = cityService.create(City.builder()
-        .name(CITY_NAME)
+    this.cityId = cityService.create(City.builder()
+        .name("Camelot")
         .description("A mythical city")
         .population(1000)
-        .build());
+        .build()).getId();
   }
 
   @Transactional
@@ -67,16 +67,12 @@ public class UserServiceTest {
 
     setMocks(user);
 
-    userService.addFavouriteCity(CITY_NAME);
+    userService.addFavouriteCity(cityId);
     Assertions.assertEquals(1, getUser().getFavouriteCities().size());
-    Assertions.assertThrows(CityAlreadyFavouredException.class, () -> userService.addFavouriteCity(CITY_NAME));
-    userService.removeFavouriteCity(CITY_NAME);
+    Assertions.assertThrows(CityAlreadyFavouredException.class, () -> userService.addFavouriteCity(cityId));
+    userService.removeFavouriteCity(cityId);
     Assertions.assertEquals(0, getUser().getFavouriteCities().size());
-    Assertions.assertThrows(CityNotFavouredException.class, () -> userService.removeFavouriteCity(CITY_NAME));
-    userService.addFavouriteCity(getCity());
-    Assertions.assertEquals(1, getUser().getFavouriteCities().size());
-    userService.removeFavouriteCity(getCity());
-    Assertions.assertEquals(0, getUser().getFavouriteCities().size());
+    Assertions.assertThrows(CityNotFavouredException.class, () -> userService.removeFavouriteCity(cityId));
   }
 
   @Transactional
@@ -84,7 +80,7 @@ public class UserServiceTest {
   @DisplayName("Test concurrent update")
   public void testConcurrentUpdate() throws Exception {
 
-    final var executorService = Executors.newFixedThreadPool(50);
+    final var executorService = Executors.newFixedThreadPool(100);
 
     final var atomicInteger = new AtomicInteger(1);
 
@@ -95,7 +91,7 @@ public class UserServiceTest {
               .password("password")
               .build());
           setMocks(user);
-          userService.addFavouriteCity(city);
+          userService.addFavouriteCity(cityId);
         }));
 
     executorService.shutdown();
@@ -112,13 +108,17 @@ public class UserServiceTest {
   }
 
   private City getCity() {
-    return cityService.findByName(CITY_NAME);
+    return cityService.findById(cityId);
   }
 
   private void setMocks(final User user) {
-    Authentication authentication = Mockito.mock(Authentication.class);
-    Mockito.when(authentication.getPrincipal()).thenReturn(user);
-    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    final var tokenAuthenticatedUser = TokenAuthenticatedUser.builder()
+        .email(user.getEmail())
+        .userId(user.getId())
+        .build();
+    final var authentication = Mockito.mock(Authentication.class);
+    Mockito.when(authentication.getPrincipal()).thenReturn(tokenAuthenticatedUser);
+    final var securityContext = Mockito.mock(SecurityContext.class);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     SecurityContextHolder.setContext(securityContext);
   }

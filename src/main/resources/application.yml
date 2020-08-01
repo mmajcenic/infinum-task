@@ -4,5 +4,6 @@ spring:
     username: infinum
     password: password
 
-  jpa:
-    show-sql: true
+app:
+  token:
+    secret: /*E<_rj&!Wb66a>n

@@ -14,7 +14,7 @@ Additionally, maximum line width is set to 150 characters.
 Furthermore, Lombok is being used for development, so appropriate plugin is required.
 
 ### Using application
-Manual for running application in local development
+Manual for using application
 
 #### Requirements 
 
@@ -23,4 +23,11 @@ Installed docker and docker-compose.
 #### Starting
 
 Execute `docker-compose up -d` in docker directory, in order to run database.
-After that step, application is ready for usage. 
+After that step, application is ready for usage and can be started in any desired manner.
+
+#### Packaging
+
+Run `gradlew build` from project root. JAR file will be located in `build/libs/` directory.
+
+#### Running tests
+Run `gradlew clean test` from project root.
