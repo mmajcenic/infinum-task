@@ -2,6 +2,7 @@ package hr.infinum.task;
 
 import static hr.infinum.task.service.impl.TokenServiceImpl.TOKEN_COOKIE_NAME;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -9,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import hr.infinum.task.controller.LoginController;
 import hr.infinum.task.dto.UserCredentials;
+import hr.infinum.task.exception.NonMatchingPasswordException;
+import hr.infinum.task.exception.UserNotFoundException;
 import hr.infinum.task.helper.JsonHelper;
 import hr.infinum.task.model.User;
 import hr.infinum.task.security.TokenAuthenticationEntryPoint;
@@ -80,7 +83,7 @@ public class LoginControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest())
-        .andExpect(content().string(containsString("Email is required")));
+        .andExpect(content().string(equalTo("Email is required")));
 
     mockMvc.perform(post("/api/v1/login")
         .with(csrf())
@@ -90,7 +93,7 @@ public class LoginControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest())
-        .andExpect(content().string(containsString("Password is required")));
+        .andExpect(content().string(equalTo("Password is required")));
 
     mockMvc.perform(post("/api/v1/login")
         .with(csrf())
@@ -101,7 +104,28 @@ public class LoginControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest())
-        .andExpect(content().string(containsString("Invalid email")));
+        .andExpect(content().string(equalTo("Invalid email")));
+
+    final var userNotFoundException = new UserNotFoundException();
+    final var nonMatchingPasswordException = new NonMatchingPasswordException();
+    Mockito.when(loginService.login(userCredentials))
+        .thenThrow(userNotFoundException, nonMatchingPasswordException);
+
+    mockMvc.perform(post("/api/v1/login")
+        .with(csrf())
+        .content(JsonHelper.toJson(userCredentials))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized())
+        .andExpect(content().string(equalTo(userNotFoundException.getMessage())));
+
+    mockMvc.perform(post("/api/v1/login")
+        .with(csrf())
+        .content(JsonHelper.toJson(userCredentials))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized())
+        .andExpect(content().string(equalTo(nonMatchingPasswordException.getMessage())));
   }
 
 }

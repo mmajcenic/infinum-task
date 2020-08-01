@@ -1,5 +1,6 @@
 package hr.infinum.task.model;
 
+import io.swagger.annotations.ApiModel;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,6 +21,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+@ApiModel
 @Builder
 @Data
 @AllArgsConstructor
@@ -34,10 +36,12 @@ public class City implements ApplicationEntity {
   @Column(name = "id")
   private Long id;
 
+  @NotNull
   @NotEmpty(message = "Name is required")
   @Column(name = "name", nullable = false, unique = true)
   private String name;
 
+  @NotNull
   @NotEmpty(message = "Description is required")
   @Column(name = "description", nullable = false)
   private String description;

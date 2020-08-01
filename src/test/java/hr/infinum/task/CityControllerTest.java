@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import hr.infinum.task.configuration.TokenTestConfiguration;
 import hr.infinum.task.controller.CityController;
+import hr.infinum.task.dto.CreateCityRequest;
 import hr.infinum.task.helper.JsonHelper;
 import hr.infinum.task.model.City;
 import hr.infinum.task.service.CityService;
@@ -67,34 +68,42 @@ public class CityControllerTest {
   public void testCreateCity() throws Exception {
     final var cityName = "test city";
 
-    final var city = City.builder()
+    Mockito.when(cityService.create(City.builder()
         .name(cityName)
         .description("test")
         .population(1)
-        .build();
+        .build()))
+        .thenReturn(City.builder()
+            .id(1L)
+            .favouriteCount(0)
+            .name(cityName)
+            .description("test")
+            .population(1)
+            .build());
 
-    Mockito.when(cityService.create(city))
-        .thenReturn(city);
-
-    mockMvc.perform(createPostRequest(city))
+    mockMvc.perform(createPostRequest(CreateCityRequest.builder()
+        .name(cityName)
+        .description("test")
+        .population(1)
+        .build()))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.name").value(cityName));
 
-    mockMvc.perform(createPostRequest(City.builder()
+    mockMvc.perform(createPostRequest(CreateCityRequest.builder()
         .description("a")
         .population(2)
         .build()))
         .andExpect(status().isBadRequest())
         .andExpect(content().string(equalTo("Name is required")));
 
-    mockMvc.perform(createPostRequest(City.builder()
+    mockMvc.perform(createPostRequest(CreateCityRequest.builder()
         .name("a")
         .population(2)
         .build()))
         .andExpect(status().isBadRequest())
         .andExpect(content().string(equalTo("Description is required")));
 
-    mockMvc.perform(createPostRequest(City.builder()
+    mockMvc.perform(createPostRequest(CreateCityRequest.builder()
         .name("a")
         .description("a")
         .build()))
@@ -122,11 +131,11 @@ public class CityControllerTest {
         .andExpect(jsonPath("[0].id").value(TEST_CITY_2.getId()));
   }
 
-  private MockHttpServletRequestBuilder createPostRequest(final City city) throws Exception {
+  private MockHttpServletRequestBuilder createPostRequest(final CreateCityRequest createCityRequest) throws Exception {
     return post("/api/v1/cities")
         .cookie(new Cookie(TOKEN_COOKIE_NAME, "signedToken"))
         .with(csrf())
-        .content(JsonHelper.toJson(city))
+        .content(JsonHelper.toJson(createCityRequest))
         .contentType(MediaType.APPLICATION_JSON)
         .characterEncoding("UTF-8")
         .accept(MediaType.APPLICATION_JSON);

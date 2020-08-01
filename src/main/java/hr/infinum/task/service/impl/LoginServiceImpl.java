@@ -1,7 +1,7 @@
 package hr.infinum.task.service.impl;
 
 import hr.infinum.task.dto.UserCredentials;
-import hr.infinum.task.exception.InvalidPasswordException;
+import hr.infinum.task.exception.NonMatchingPasswordException;
 import hr.infinum.task.exception.UserNotFoundException;
 import hr.infinum.task.model.User;
 import hr.infinum.task.service.LoginService;
@@ -26,7 +26,7 @@ public class LoginServiceImpl implements LoginService {
 
     Optional.ofNullable(user.getPassword())
         .filter(password -> passwordMatches(userCredentials.getPassword(), password))
-        .orElseThrow(InvalidPasswordException::new);
+        .orElseThrow(NonMatchingPasswordException::new);
 
     return user;
   }

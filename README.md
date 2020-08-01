@@ -27,7 +27,13 @@ After that step, application is ready for usage and can be started in any desire
 
 #### Packaging
 
-Run `gradlew build` from project root. JAR file will be located in `build/libs/` directory.
+Run `gradlew assemble` from project root. JAR file will be located in `build/libs/` directory.
 
 #### Running tests
 Run `gradlew clean test` from project root.
+
+### REST API
+
+This project provides REST API that is described by Swagger, whose definition is available on ```/v2/api-docs```.
+
+Visualization of Swagger is available on ```/swagger-ui/```.

@@ -18,6 +18,7 @@ CREATE TABLE city (
     last_modified_at                     TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
+CREATE INDEX favourite_count_i ON city(favourite_count);
 CREATE INDEX city_name_i ON city(name);
 
 -- Favourite user cities

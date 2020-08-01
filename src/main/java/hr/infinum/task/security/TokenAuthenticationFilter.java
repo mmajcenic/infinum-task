@@ -4,7 +4,6 @@ package hr.infinum.task.security;
 import static hr.infinum.task.service.impl.TokenServiceImpl.TOKEN_COOKIE_NAME;
 
 import hr.infinum.task.service.TokenService;
-import hr.infinum.task.service.UserService;
 import java.io.IOException;
 import java.util.Optional;
 import javax.servlet.FilterChain;
@@ -29,14 +28,18 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(@NonNull final HttpServletRequest httpServletRequest,
       @NonNull final HttpServletResponse httpServletResponse,
-      final FilterChain filterChain) throws IOException, ServletException {
+      @NonNull final FilterChain filterChain) throws IOException, ServletException {
 
-    Optional.ofNullable(WebUtils.getCookie(httpServletRequest, TOKEN_COOKIE_NAME))
-        .map(Cookie::getValue)
-        .filter(tokenService::isNotExpired)
-        .map(tokenService::createTokenUser)
-        .ifPresentOrElse(this::initializeSecurityContext,
-            SecurityContextHolder::clearContext);
+    try {
+      Optional.ofNullable(WebUtils.getCookie(httpServletRequest, TOKEN_COOKIE_NAME))
+          .map(Cookie::getValue)
+          .filter(tokenService::isNotExpired)
+          .map(tokenService::createTokenUser)
+          .ifPresentOrElse(this::initializeSecurityContext,
+              SecurityContextHolder::clearContext);
+    } catch (final Exception e) {
+      SecurityContextHolder.clearContext();
+    }
 
     filterChain.doFilter(httpServletRequest, httpServletResponse);
   }

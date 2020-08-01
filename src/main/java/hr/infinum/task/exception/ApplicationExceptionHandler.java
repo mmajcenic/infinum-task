@@ -23,7 +23,6 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
   @ExceptionHandler({
       CityAlreadyFavouredException.class,
       CityNotFavouredException.class,
-      InvalidPasswordException.class,
       IllegalArgumentException.class,
       IllegalStateException.class
   })
@@ -32,11 +31,18 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
   }
 
   @ExceptionHandler({
-      EntityNotFoundException.class,
-      UserNotFoundException.class
+      EntityNotFoundException.class
   })
   public ResponseEntity<String> handleEntityNotFound(final RuntimeException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler({
+      NonMatchingPasswordException.class,
+      UserNotFoundException.class
+  })
+  public ResponseEntity<String> handleAuthenticationExceptions(final RuntimeException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)
