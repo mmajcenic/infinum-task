@@ -34,7 +34,7 @@ dependencies {
 	}
 	testImplementation "org.springframework.security:spring-security-test"
 	testImplementation "org.springframework.cloud:spring-cloud-starter:2.2.3.RELEASE"
-	testImplementation "com.playtika.testcontainers:embedded-postgresql:1.79"
+	testImplementation "com.playtika.testcontainers:embedded-postgresql:1.82"
 }
 
 test {
