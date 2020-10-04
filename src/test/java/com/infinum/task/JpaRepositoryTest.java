@@ -1,7 +1,6 @@
 package com.infinum.task;
 
 import com.infinum.task.city.repository.CityRepository;
-import com.infinum.task.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

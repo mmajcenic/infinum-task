@@ -1,4 +1,4 @@
-package com.infinum.task.configuration;
+package com.infinum.task.swagger;
 
 import java.util.Set;
 import org.springframework.context.annotation.Bean;

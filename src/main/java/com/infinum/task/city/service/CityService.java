@@ -1,6 +1,8 @@
 package com.infinum.task.city.service;
 
 import com.infinum.task.city.model.City;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
@@ -9,8 +11,8 @@ public interface CityService {
 
     City findById(Long cityId);
 
-    List<City> getAllSortedByCreationDate();
+    Page<City> findAll(Pageable pageable);
 
-    List<City> getAllSortedByFavouriteCount();
+    City create(City city);
 
 }

@@ -2,11 +2,13 @@ package com.infinum.task.security.service.impl;
 
 import com.infinum.task.security.model.TokenAuthenticatedUser;
 import com.infinum.task.security.service.TokenService;
+import com.infinum.task.user.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 import javax.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +33,7 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   public String generateToken(final User user) {
-    final var claims = new HashMap<String, Object>();
+    final Map<String, Object> claims = new HashMap<>();
     claims.put(USER_ID_CLAIM, user.getId());
     return Jwts.builder()
         .setClaims(claims)
@@ -43,8 +45,8 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   public Cookie createCookie(final User user) {
-    final var token = generateToken(user);
-    final var cookie = new Cookie(TOKEN_COOKIE_NAME, token);
+    final String token = generateToken(user);
+    final Cookie cookie = new Cookie(TOKEN_COOKIE_NAME, token);
     cookie.setMaxAge(Math.toIntExact(validity / 1000));
     cookie.setHttpOnly(true);
     cookie.setPath("/");
@@ -53,7 +55,7 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   public TokenAuthenticatedUser createTokenUser(final String token) {
-    final var claims = getAllClaimsFromToken(token);
+    final Claims claims = getAllClaimsFromToken(token);
     return TokenAuthenticatedUser.builder()
         .email(getEmailFromClaims(claims))
         .userId(getUserIdFromClaims(claims))
@@ -69,7 +71,6 @@ public class TokenServiceImpl implements TokenService {
     return getClaimFromToken(token, Claims::getExpiration);
   }
 
-
   private String getEmailFromClaims(final Claims claims) {
     return claims.getSubject();
   }
@@ -77,7 +78,6 @@ public class TokenServiceImpl implements TokenService {
   private Long getUserIdFromClaims(final Claims claims) {
     return claims.get(USER_ID_CLAIM, Long.class);
   }
-
 
   private <T> T getClaimFromToken(final String token,
       final Function<Claims, T> claimsResolver) {

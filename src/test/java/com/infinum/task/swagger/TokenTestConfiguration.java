@@ -1,4 +1,4 @@
-package com.infinum.task.configuration;
+package com.infinum.task.swagger;
 
 import static org.mockito.ArgumentMatchers.any;
 

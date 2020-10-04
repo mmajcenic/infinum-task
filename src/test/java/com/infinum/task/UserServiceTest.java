@@ -2,7 +2,6 @@ package com.infinum.task;
 
 import com.infinum.task.user.exception.CityAlreadyFavouredException;
 import com.infinum.task.user.exception.CityNotFavouredException;
-import com.infinum.task.user.repository.UserRepository;
 import com.infinum.task.security.model.TokenAuthenticatedUser;
 import com.infinum.task.city.service.CityService;
 import com.infinum.task.user.service.UserService;

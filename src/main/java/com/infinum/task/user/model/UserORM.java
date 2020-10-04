@@ -66,7 +66,4 @@ public class UserORM implements PersistenceEntity {
     @LastModifiedDate
     private LocalDateTime lastModifiedAt;
 
-    public List<CityORM> getFavouriteCities() {
-        return Collections.unmodifiableList(favouriteCities);
-    }
 }

@@ -10,9 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.infinum.task.configuration.TokenTestConfiguration;
+import com.infinum.task.swagger.TokenTestConfiguration;
 import com.infinum.task.helper.JsonHelper;
-import com.infinum.task.controller.UserController;
 import com.infinum.task.security.model.UserCredentials;
 import com.infinum.task.user.exception.CityAlreadyFavouredException;
 import com.infinum.task.user.exception.CityNotFavouredException;

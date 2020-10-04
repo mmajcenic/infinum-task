@@ -9,9 +9,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.infinum.task.configuration.TokenTestConfiguration;
+import com.infinum.task.swagger.TokenTestConfiguration;
 import com.infinum.task.helper.JsonHelper;
-import com.infinum.task.controller.CityController;
+import com.infinum.task.city.web.CityController;
 import com.infinum.task.city.model.CreateCityRequest;
 import com.infinum.task.city.service.CityService;
 import java.time.LocalDateTime;

@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface UserService {
 
-  List<City> addFavouriteCity(City city);
+  User addFavouriteCity(City city);
 
-  List<City> removeFavouriteCity(City city);
+  User removeFavouriteCity(City city);
 
   User findByEmail(String email);
 

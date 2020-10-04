@@ -1,0 +1,29 @@
+@startuml
+class EntityController
+note left: Controllers handle external requests.\n Part of interface layer.
+
+class EntityServiceFacade
+note left: Service facades decouple domain from interface \n and use DTO converter for type conversion
+
+class EntityDTOConverter
+
+class EntityService
+note left: Entity services drive workflow of model \nin domain. Part of application layer.
+
+class Entity
+note top: Entity is an aggregate root that handles all\n business logic. Part of domain layer
+
+class EntityRepositoryFacade
+note bottom: Persistence facade is actual repository in DDD
+
+class EntityRepository
+note bottom: Stores objects into datastore,\n part of infrastructure
+
+EntityController --* EntityServiceFacade
+EntityServiceFacade --* EntityService
+EntityServiceFacade --* EntityDTOConverter
+EntityService - Entity
+EntityService - EntityRepositoryFacade
+EntityRepositoryFacade --* EntityORMConverter
+EntityRepositoryFacade --* EntityRepository
+@enduml
