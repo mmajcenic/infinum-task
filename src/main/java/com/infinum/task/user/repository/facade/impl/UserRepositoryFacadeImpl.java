@@ -4,8 +4,10 @@ import com.infinum.task.user.model.User;
 import com.infinum.task.user.model.UserORM;
 import com.infinum.task.user.repository.UserRepository;
 import com.infinum.task.user.repository.facade.UserRepositoryFacade;
+import com.infinum.task.user.repository.facade.converter.UserORMConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -13,7 +15,7 @@ public class UserRepositoryFacadeImpl implements UserRepositoryFacade {
 
     private final UserRepository userRepository;
 
-    private final com.infinum.task.user.repository.facade.converter.UserORMConverter userORMConverter;
+    private final UserORMConverter userORMConverter;
 
     @Override
     public User save(final User user) {
@@ -23,14 +25,15 @@ public class UserRepositoryFacadeImpl implements UserRepositoryFacade {
     }
 
     @Override
-    public User findByEmail(final String email) {
+    public Optional<User> findByEmail(final String email) {
         final UserORM userORM = userRepository.findByEmail(email);
-        return userORMConverter.convertToDomain(userORM);
+        return Optional.ofNullable(userORM)
+                .map(userORMConverter::convertToDomain);
     }
 
     @Override
-    public User findById(final Long id) {
-        final UserORM userORM = userRepository.getOne(id);
-        return userORMConverter.convertToDomain(userORM);
+    public Optional<User> findById(final Long id) {
+        return userRepository.findById(id)
+                .map(userORMConverter::convertToDomain);
     }
 }

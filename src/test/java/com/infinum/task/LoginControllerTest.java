@@ -1,22 +1,13 @@
 package com.infinum.task;
 
-import static com.infinum.task.security.service.impl.TokenServiceImpl.TOKEN_COOKIE_NAME;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.infinum.task.helper.JsonHelper;
-import com.infinum.task.controller.LoginController;
-import com.infinum.task.security.model.UserCredentials;
 import com.infinum.task.security.exception.NonMatchingPasswordException;
 import com.infinum.task.security.exception.UserNotFoundException;
-import com.infinum.task.security.TokenAuthenticationEntryPoint;
-import com.infinum.task.security.service.LoginService;
-import com.infinum.task.security.service.TokenService;
-import javax.servlet.http.Cookie;
+import com.infinum.task.security.model.UserCredentials;
+import com.infinum.task.security.web.LoginController;
+import com.infinum.task.security.web.facade.LoginServiceFacade;
+import com.infinum.task.user.model.UserDTO;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -26,105 +17,105 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SuppressWarnings("unused")
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @WebMvcTest(LoginController.class)
 @TestInstance(Lifecycle.PER_CLASS)
-public class LoginControllerTest {
+@ContextConfiguration(classes = TokenTestConfiguration.class)
+class LoginControllerTest {
 
-  @MockBean
-  private LoginService loginService;
+    @MockBean
+    private LoginServiceFacade loginServiceFacade;
 
-  @MockBean
-  private TokenService tokenService;
+    @Autowired
+    private MockMvc mockMvc;
 
-  @MockBean
-  private TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint;
+    @Test
+    @DisplayName("Login test")
+    void loginTest() throws Exception {
+        final String email = "test@test.hr";
 
-  @Autowired
-  private MockMvc mockMvc;
+        final UserDTO user = UserDTO.builder()
+                .email(email)
+                .build();
 
-  @Test
-  @DisplayName("Login test")
-  public void loginTest() throws Exception {
-    final var email = "test@test.hr";
+        final UserCredentials userCredentials = UserCredentials.builder()
+                .email(email)
+                .password("password")
+                .build();
 
-    final var user = User.builder()
-        .email(email)
-        .id(1L)
-        .build();
+        Assertions.assertEquals(email, userCredentials.getEmail());
 
-    Mockito.when(tokenService.createCookie(user))
-        .thenReturn(new Cookie(TOKEN_COOKIE_NAME, "signedToken"));
+        Mockito.when(loginServiceFacade.login(Mockito.eq(userCredentials), Mockito.any()))
+                .thenReturn(user);
 
-    final var userCredentials = UserCredentials.builder()
-        .email(email)
-        .password("password")
-        .build();
+        mockMvc.perform(post("/api/v1/login")
+                .with(csrf())
+                .content(JsonHelper.toJson(userCredentials))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(email)));
 
-    Mockito.when(loginService.login(userCredentials))
-        .thenReturn(user);
+        mockMvc.perform(post("/api/v1/login")
+                .with(csrf())
+                .content(JsonHelper.toJson(UserCredentials.builder()
+                        .password("password")
+                        .build()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("Email is required")));
 
-    mockMvc.perform(post("/api/v1/login")
-        .with(csrf())
-        .content(JsonHelper.toJson(userCredentials))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().string(containsString(email)));
+        mockMvc.perform(post("/api/v1/login")
+                .with(csrf())
+                .content(JsonHelper.toJson(UserCredentials.builder()
+                        .email("test@test.gr")
+                        .build()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("Password is required")));
 
-    mockMvc.perform(post("/api/v1/login")
-        .with(csrf())
-        .content(JsonHelper.toJson(UserCredentials.builder()
-            .password("password")
-            .build()))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest())
-        .andExpect(content().string(equalTo("Email is required")));
+        mockMvc.perform(post("/api/v1/login")
+                .with(csrf())
+                .content(JsonHelper.toJson(UserCredentials.builder()
+                        .email("test")
+                        .password("password")
+                        .build()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("Invalid email")));
 
-    mockMvc.perform(post("/api/v1/login")
-        .with(csrf())
-        .content(JsonHelper.toJson(UserCredentials.builder()
-            .email("test@test.gr")
-            .build()))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest())
-        .andExpect(content().string(equalTo("Password is required")));
+        final UserNotFoundException userNotFoundException = new UserNotFoundException();
+        final NonMatchingPasswordException nonMatchingPasswordException = new NonMatchingPasswordException();
+        Mockito.when(loginServiceFacade.login(Mockito.eq(userCredentials), Mockito.any()))
+                .thenThrow(userNotFoundException, nonMatchingPasswordException);
 
-    mockMvc.perform(post("/api/v1/login")
-        .with(csrf())
-        .content(JsonHelper.toJson(UserCredentials.builder()
-            .email("test")
-            .password("password")
-            .build()))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest())
-        .andExpect(content().string(equalTo("Invalid email")));
+        mockMvc.perform(post("/api/v1/login")
+                .with(csrf())
+                .content(JsonHelper.toJson(userCredentials))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(equalTo(userNotFoundException.getMessage())));
 
-    final var userNotFoundException = new UserNotFoundException();
-    final var nonMatchingPasswordException = new NonMatchingPasswordException();
-    Mockito.when(loginService.login(userCredentials))
-        .thenThrow(userNotFoundException, nonMatchingPasswordException);
-
-    mockMvc.perform(post("/api/v1/login")
-        .with(csrf())
-        .content(JsonHelper.toJson(userCredentials))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isUnauthorized())
-        .andExpect(content().string(equalTo(userNotFoundException.getMessage())));
-
-    mockMvc.perform(post("/api/v1/login")
-        .with(csrf())
-        .content(JsonHelper.toJson(userCredentials))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isUnauthorized())
-        .andExpect(content().string(equalTo(nonMatchingPasswordException.getMessage())));
-  }
+        mockMvc.perform(post("/api/v1/login")
+                .with(csrf())
+                .content(JsonHelper.toJson(userCredentials))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(equalTo(nonMatchingPasswordException.getMessage())));
+    }
 
 }

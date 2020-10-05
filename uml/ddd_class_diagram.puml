@@ -5,8 +5,6 @@ note left: Controllers handle external requests.\n Part of interface layer.
 class EntityServiceFacade
 note left: Service facades decouple domain from interface \n and use DTO converter for type conversion
 
-class EntityDTOConverter
-
 class EntityService
 note left: Entity services drive workflow of model \nin domain. Part of application layer.
 
@@ -21,9 +19,8 @@ note bottom: Stores objects into datastore,\n part of infrastructure
 
 EntityController --* EntityServiceFacade
 EntityServiceFacade --* EntityService
-EntityServiceFacade --* EntityDTOConverter
+EntityServiceFacade --* EntityRepositoryFacade
 EntityService - Entity
-EntityService - EntityRepositoryFacade
-EntityRepositoryFacade --* EntityORMConverter
+EntityService --* EntityRepositoryFacade
 EntityRepositoryFacade --* EntityRepository
 @enduml

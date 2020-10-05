@@ -1,6 +1,7 @@
 package com.infinum.task.city.repository.facade.impl;
 
 import com.infinum.task.city.model.City;
+import com.infinum.task.city.model.CityORM;
 import com.infinum.task.city.repository.CityRepository;
 import com.infinum.task.city.repository.facade.converter.CityORMConverter;
 import com.infinum.task.city.repository.facade.CityRepositoryFacade;
@@ -25,17 +26,18 @@ public class CityRepositoryFacadeImpl implements CityRepositoryFacade {
 
     @Override
     public City findByName(final String name) {
-        return null;
+        return cityORMConverter.convertToDomain(cityRepository.findByNameIgnoreCase(name));
     }
 
     @Override
     public City getById(final Long id) {
-        return null;
+        return cityORMConverter.convertToDomain(cityRepository.getById(id));
     }
 
     @Override
     public City save(final City city) {
-        return null;
+        final CityORM cityORM = cityRepository.save(cityORMConverter.convertFromDomain(city));
+        return cityORMConverter.convertToDomain(cityORM);
     }
 
 }

@@ -1,6 +1,9 @@
 package com.infinum.task;
 
+import com.infinum.task.city.model.CityORM;
 import com.infinum.task.city.repository.CityRepository;
+import com.infinum.task.user.model.UserORM;
+import com.infinum.task.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,87 +16,77 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @TestInstance(Lifecycle.PER_CLASS)
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class JpaRepositoryTest {
+class JpaRepositoryTest {
 
-  @Autowired
-  private CityRepository cityRepository;
+    @Autowired
+    private CityRepository cityRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-  @Test
-  public void testCityPersistence() {
-    final var city = cityRepository.save(City.builder()
-        .name("Rijeka")
-        .description("Description of a city")
-        .population(1000)
-        .build());
+    @Test
+    void testCityPersistence() {
+        final CityORM city = cityRepository.save(CityORM.builder()
+                .name("Rijeka")
+                .description("Description of a city")
+                .population(1000)
+                .favouriteCount(0)
+                .build());
 
-    Assertions.assertEquals(0, city.getFavouriteCount());
-    Assertions.assertEquals(city.getCreatedAt(), city.getLastModifiedAt());
+        Assertions.assertEquals(0, city.getFavouriteCount());
+    }
 
-    city.setDescription("Another description of a city");
-    cityRepository.saveAndFlush(city);
+    @Test
+    @DisplayName("Test user persistence")
+    void testUserPersistence() {
+        final String email = "test@test.hr";
 
-    Assertions.assertTrue(city.getCreatedAt().isBefore(city.getLastModifiedAt()));
-  }
+        userRepository.save(UserORM.builder()
+                .email(email)
+                .password("password")
+                .build());
 
-  @Test
-  @DisplayName("Test user persistence")
-  public void testUserPersistence() {
-    final var email = "test@test.hr";
+        Assertions.assertEquals(email, userRepository.findByEmail(email).getEmail());
+    }
 
-    final var user = userRepository.save(User.builder()
-        .email(email)
-        .password("password")
-        .build());
+    @Test
+    @DisplayName("Test find city by name")
+    void testFindCityByName() {
+        final CityORM city = cityRepository.save(CityORM.builder()
+                .name("Osijek")
+                .description("Description of a city")
+                .population(1000)
+                .favouriteCount(0)
+                .build());
 
-    Assertions.assertEquals(email, userRepository.findByEmail(email).getEmail());
-    Assertions.assertEquals(user.getCreatedAt(), user.getLastModifiedAt());
+        Assertions.assertEquals(city, cityRepository.findByNameIgnoreCase("Osijek"));
+        Assertions.assertEquals(city, cityRepository.findByNameIgnoreCase("osijek"));
+        Assertions.assertNull(cityRepository.findByNameIgnoreCase("osije"));
+    }
 
-    user.setPassword("password123");
-    userRepository.saveAndFlush(user);
+    @Test
+    @DisplayName("Test one to many relation")
+    void testOneToMany() {
+        final String email = "test123@test.hr";
 
-    Assertions.assertTrue(user.getCreatedAt().isBefore(user.getLastModifiedAt()));
-  }
+        final UserORM user = userRepository.save(UserORM.builder()
+                .email(email)
+                .password("password")
+                .build());
+        final CityORM city = cityRepository.save(CityORM.builder()
+                .name("Rijeka")
+                .description("Description of a city")
+                .population(1000)
+                .favouriteCount(0)
+                .build());
 
-  @Test
-  @DisplayName("Test find city by name")
-  public void testFindCityByName() {
-    final var city = cityRepository.save(City.builder()
-        .name("Osijek")
-        .description("Description of a city")
-        .population(1000)
-        .build());
+        user.getFavouriteCities().add(city);
 
-    Assertions.assertEquals(city, cityRepository.findByNameIgnoreCase("Osijek"));
-    Assertions.assertEquals(city, cityRepository.findByNameIgnoreCase("osijek"));
-    Assertions.assertNull(cityRepository.findByNameIgnoreCase("osije"));
-  }
+        Assertions.assertEquals(1, userRepository.findByEmail(email).getFavouriteCities().size());
 
-  @Test
-  @DisplayName("Test one to many relation")
-  public void testOneToMany() {
-    final var email = "test123@test.hr";
+        user.getFavouriteCities().remove(city);
 
-    final var user = userRepository.save(User.builder()
-        .email(email)
-        .password("password")
-        .build());
-    final var city = cityRepository.save(City.builder()
-        .name("Rijeka")
-        .description("Description of a city")
-        .population(1000)
-        .build());
-
-    user.addFavouriteCity(city);
-
-    Assertions.assertEquals(1, userRepository.findByEmail(email).getFavouriteCities().size());
-
-    user.removeFavouriteCity(city);
-
-    Assertions.assertEquals(0, userRepository.findByEmail(email).getFavouriteCities().size());
-  }
-
+        Assertions.assertEquals(0, userRepository.findByEmail(email).getFavouriteCities().size());
+    }
 
 }

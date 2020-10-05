@@ -9,6 +9,7 @@ import com.infinum.task.user.exception.CityNotFavouredException;
 import com.infinum.task.user.model.User;
 import com.infinum.task.user.repository.facade.UserRepositoryFacade;
 import com.infinum.task.user.service.UserService;
+import com.infinum.task.user.web.facade.UserServiceFacade;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -24,17 +25,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 @TestInstance(Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class UserServiceTest {
+class UserServiceFacadeTest {
 
     private static final String EMAIL = "test@test.hr";
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserServiceFacade userServiceFacade;
 
     @Autowired
     private UserRepositoryFacade userRepositoryFacade;
@@ -47,7 +55,7 @@ class UserServiceTest {
     @BeforeAll
     void setup() {
         this.city = cityService.create(City.builder()
-                .name("Testy town")
+                .name("Camelot")
                 .description("A mythical city")
                 .population(1000)
                 .favouriteCount(0)
@@ -62,21 +70,54 @@ class UserServiceTest {
         final User user = userService.create(User.builder()
                 .email(EMAIL)
                 .password("password")
-                .favouriteCities(new ArrayList<>())
                 .build());
 
         setMocks(user);
 
-        userService.addFavouriteCity(user, city);
+        final long id = city.getId();
+
+        userServiceFacade.addFavouriteCity(city.getId());
         Assertions.assertEquals(1, getUser().getFavouriteCities().size());
-        Assertions.assertThrows(CityAlreadyFavouredException.class, () -> userService.addFavouriteCity(user, city));
-        userService.removeFavouriteCity(user, city);
+        Assertions.assertThrows(CityAlreadyFavouredException.class, () -> userServiceFacade.addFavouriteCity(id));
+        userServiceFacade.removeFavouriteCity(city.getId());
         Assertions.assertEquals(0, getUser().getFavouriteCities().size());
-        Assertions.assertThrows(CityNotFavouredException.class, () -> userService.removeFavouriteCity(user, city));
+        Assertions.assertThrows(CityNotFavouredException.class, () -> userServiceFacade.removeFavouriteCity(id));
+    }
+
+    @Transactional
+    @Test
+    @DisplayName("Test concurrent update")
+    void testConcurrentUpdate() throws Exception {
+
+        final ExecutorService executorService = Executors.newFixedThreadPool(100);
+
+        final AtomicInteger atomicInteger = new AtomicInteger(1);
+
+        IntStream.range(0, 100)
+                .forEach(i -> executorService.execute(() -> {
+                    final User user = userService.create(User.builder()
+                            .email(EMAIL.concat(String.valueOf(atomicInteger.getAndIncrement())))
+                            .password("password")
+                            .build());
+                    setMocks(user);
+                    userServiceFacade.addFavouriteCity(city.getId());
+                }));
+
+        executorService.shutdown();
+        executorService.awaitTermination(30, TimeUnit.SECONDS);
+
+        Assertions.assertTrue(executorService.isTerminated());
+
+        Assertions.assertEquals(100, getCity().getFavouriteCount());
+
     }
 
     private User getUser() {
         return userRepositoryFacade.findByEmail(EMAIL).orElseThrow(UserNotFoundException::new);
+    }
+
+    private City getCity() {
+        return cityService.findById(city.getId());
     }
 
     private void setMocks(final User user) {

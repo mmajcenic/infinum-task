@@ -1,6 +1,7 @@
-package com.infinum.task.controller;
+package com.infinum.task.security.web;
 
 import com.infinum.task.security.model.UserCredentials;
+import com.infinum.task.security.web.facade.LoginServiceFacade;
 import com.infinum.task.user.model.UserDTO;
 import com.infinum.task.security.service.LoginService;
 import com.infinum.task.security.service.TokenService;
@@ -25,9 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/login")
 public class LoginController {
 
-  private final LoginService loginService;
-
-  private final TokenService tokenService;
+  private final LoginServiceFacade loginServiceFacade;
 
   @ApiOperation(value = "Login", response = UserDTO.class)
   @ApiResponses(value = {
@@ -38,9 +37,7 @@ public class LoginController {
   @ResponseStatus(HttpStatus.OK)
   public UserDTO login(@RequestBody @NotNull @Valid final UserCredentials userCredentials,
       final HttpServletResponse response) {
-    final var user = loginService.login(userCredentials);
-    response.addCookie(tokenService.createCookie(user));
-    return UserDTO.fromUser(user);
+    return loginServiceFacade.login(userCredentials, response);
   }
 
 }

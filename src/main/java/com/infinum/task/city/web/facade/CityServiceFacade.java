@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 
 public interface CityServiceFacade {
 
-    CityDTO createCity(CreateCityRequest createCityRequest);
+    CityDTO create(CreateCityRequest createCityRequest);
 
     Page<CityDTO> getAllCities(boolean sortByFavourites, int page, int size);
 

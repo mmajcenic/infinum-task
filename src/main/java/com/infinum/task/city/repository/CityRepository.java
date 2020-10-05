@@ -1,8 +1,6 @@
 package com.infinum.task.city.repository;
 
 import com.infinum.task.city.model.CityORM;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.QueryHints;

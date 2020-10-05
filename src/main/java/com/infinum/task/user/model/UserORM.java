@@ -9,12 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -57,13 +53,5 @@ public class UserORM implements PersistenceEntity {
             joinColumns = @JoinColumn(name = "application_user_id"),
             inverseJoinColumns = @JoinColumn(name = "city_id"))
     private List<CityORM> favouriteCities = new ArrayList<>();
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @CreatedDate
-    private LocalDateTime createdAt;
-
-    @Column(name = "last_modified_at", nullable = false)
-    @LastModifiedDate
-    private LocalDateTime lastModifiedAt;
 
 }

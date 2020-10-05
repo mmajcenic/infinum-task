@@ -2,9 +2,7 @@
 CREATE TABLE application_user (
 	id                                   BIGSERIAL PRIMARY KEY,
 	email                                TEXT NOT NULL UNIQUE,
-	password                             TEXT NOT NULL,
-	created_at                           TIMESTAMP WITH TIME ZONE NOT NULL,
-    last_modified_at                     TIMESTAMP WITH TIME ZONE NOT NULL
+	password                             TEXT NOT NULL
 );
 
 -- City
@@ -13,9 +11,7 @@ CREATE TABLE city (
 	name                                 TEXT NOT NULL UNIQUE,
 	description                          TEXT NOT NULL,
 	population                           INTEGER NOT NULL,
-    favourite_count                      INTEGER DEFAULT 0 NOT NULL,
-    created_at                           TIMESTAMP WITH TIME ZONE NOT NULL,
-    last_modified_at                     TIMESTAMP WITH TIME ZONE NOT NULL
+    favourite_count                      INTEGER DEFAULT 0 NOT NULL
 );
 
 CREATE INDEX favourite_count_i ON city(favourite_count);

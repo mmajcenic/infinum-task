@@ -11,12 +11,22 @@ public class CityORMConverter implements ORMConverter<City, CityORM> {
     @Override
     public CityORM convertFromDomain(final City entity) {
         return CityORM.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .population(entity.getPopulation())
+                .favouriteCount(entity.getFavouriteCount())
                 .build();
     }
 
     @Override
     public City convertToDomain(final CityORM orm) {
         return City.builder()
+                .id(orm.getId())
+                .name(orm.getName())
+                .description(orm.getDescription())
+                .population(orm.getPopulation())
+                .favouriteCount(orm.getFavouriteCount())
                 .build();
     }
 }

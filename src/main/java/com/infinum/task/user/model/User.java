@@ -1,6 +1,7 @@
 package com.infinum.task.user.model;
 
 import com.infinum.task.city.model.City;
+import com.infinum.task.shared.DomainEntity;
 import com.infinum.task.user.exception.CityAlreadyFavouredException;
 import com.infinum.task.user.exception.CityNotFavouredException;
 import lombok.Builder;
@@ -11,7 +12,7 @@ import java.util.Optional;
 
 @Builder
 @Data
-public class User {
+public class User implements DomainEntity<User> {
 
     private Long id;
 
@@ -47,4 +48,8 @@ public class User {
                 .ifPresent(this::setPassword);
     }
 
+    @Override
+    public boolean sameIdentityAs(final User other) {
+        return other != null && id.equals(other.id);
+    }
 }

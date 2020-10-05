@@ -1,4 +1,4 @@
-package com.infinum.task.swagger;
+package com.infinum.task;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -19,7 +19,7 @@ public class TokenTestConfiguration {
 
   @Bean
   public TokenService tokenService() {
-    final var tokenService = Mockito.mock(TokenService.class);
+    final TokenService tokenService = Mockito.mock(TokenService.class);
     Mockito.when(tokenService.isNotExpired(any(String.class)))
         .thenReturn(true);
 

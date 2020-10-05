@@ -35,7 +35,7 @@ public class CityController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CityDTO create(@RequestBody @Valid final CreateCityRequest createCityRequest) {
-        return cityServiceFacade.createCity(createCityRequest);
+        return cityServiceFacade.create(createCityRequest);
     }
 
     @ApiOperation(value = "Get all cities", response = CityDTO[].class)

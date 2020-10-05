@@ -4,35 +4,37 @@ import com.infinum.task.security.exception.NonMatchingPasswordException;
 import com.infinum.task.security.exception.UserNotFoundException;
 import com.infinum.task.security.model.UserCredentials;
 import com.infinum.task.security.service.LoginService;
-import com.infinum.task.user.service.UserService;
-import java.util.Optional;
 import com.infinum.task.user.model.User;
+import com.infinum.task.user.repository.facade.UserRepositoryFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class LoginServiceImpl implements LoginService {
 
-  private final UserService userService;
+    private final UserRepositoryFacade userRepositoryFacade;
 
-  private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-  @Override
-  public User login(final UserCredentials userCredentials) {
-    final User user = Optional.ofNullable(userService.findByEmail(userCredentials.getEmail()))
-        .orElseThrow(UserNotFoundException::new);
+    @Override
+    public User login(final UserCredentials userCredentials) {
+        final User user = userRepositoryFacade.findByEmail(userCredentials.getEmail())
+                .orElseThrow(UserNotFoundException::new);
 
-    Optional.ofNullable(user.getPassword())
-        .filter(password -> passwordMatches(userCredentials.getPassword(), password))
-        .orElseThrow(NonMatchingPasswordException::new);
+        if (Optional.ofNullable(user.getPassword())
+                .filter(password -> passwordMatches(userCredentials.getPassword(), password))
+                .isEmpty()) {
+            throw new NonMatchingPasswordException();
+        }
 
-    return user;
-  }
+        return user;
+    }
 
-  private boolean passwordMatches(final String plainPassword, final String encryptedPassword) {
-    return passwordEncoder.matches(plainPassword, encryptedPassword);
-  }
+    private boolean passwordMatches(final String plainPassword, final String encryptedPassword) {
+        return passwordEncoder.matches(plainPassword, encryptedPassword);
+    }
 
 }

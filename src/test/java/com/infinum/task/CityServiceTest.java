@@ -1,5 +1,6 @@
 package com.infinum.task;
 
+import com.infinum.task.city.model.City;
 import com.infinum.task.city.service.CityService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -10,35 +11,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @TestInstance(Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class CityServiceTest {
+class CityServiceTest {
 
-  private static final long ID = 1L;
+    private static final long ID = 1L;
 
-  @Autowired
-  private CityService cityService;
+    @Autowired
+    private CityService cityService;
 
-  @Test
-  @DisplayName("Test fetching of all cities")
-  public void testGetList() {
-    Assertions.assertEquals(10, cityService.getAllSortedByCreationDate().size());
-    cityService.incrementFavouriteCount(cityService.findById(ID));
-    final var sortedByFavourite = cityService.getAllSortedByFavouriteCount();
-    Assertions.assertEquals(10, sortedByFavourite.size());
-    Assertions.assertEquals(ID, sortedByFavourite.get(0).getId());
-    cityService.decrementFavouriteCount(cityService.findById(ID));
-  }
-
-  @Test
-  @DisplayName("Test increment and decrement of favourite count")
-  public void testIncrementAndDecrement() {
-    cityService.incrementFavouriteCount(cityService.findById(ID));
-    Assertions.assertEquals(1, cityService.findById(ID).getFavouriteCount());
-    cityService.decrementFavouriteCount(cityService.findById(ID));
-    Assertions.assertEquals(0, cityService.findById(ID).getFavouriteCount());
-  }
+    @Test
+    @DisplayName("Test fetching of all cities")
+    void testFindAll() {
+        final Pageable pageable = PageRequest.of(0, 5,
+                Sort.by(Sort.Direction.DESC, "name"));
+        Assertions.assertEquals(5, cityService.findAll(pageable).getNumberOfElements());
+        final City city = cityService.findById(ID);
+        Assertions.assertEquals(ID, city.getId());
+    }
 
 }

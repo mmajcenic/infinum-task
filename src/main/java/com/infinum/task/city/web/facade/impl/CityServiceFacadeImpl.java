@@ -17,16 +17,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class CityServiceFacadeImpl implements CityServiceFacade {
 
+    private static final Sort DEFAULT_SORT = Sort.by("name").ascending();
+
+    private static final Sort SORT_BY_FAVOURITE = Sort.by("favouriteCount").descending()
+            .and(Sort.by("name").ascending());
+
     private final CityDTOConverter cityDTOConverter;
 
     private final CityService cityService;
 
     @Override
-    public CityDTO createCity(final CreateCityRequest createCityRequest) {
+    public CityDTO create(final CreateCityRequest createCityRequest) {
         final City city = cityService.create(City.builder()
                 .name(createCityRequest.getName())
                 .description(createCityRequest.getDescription())
                 .population(createCityRequest.getPopulation())
+                .favouriteCount(0)
                 .build());
         return cityDTOConverter.convertFromDomain(city);
     }
@@ -35,9 +41,8 @@ public class CityServiceFacadeImpl implements CityServiceFacade {
     public Page<CityDTO> getAllCities(final boolean sortByFavourites,
                                       final int page,
                                       final int size) {
-        final String sortedColumn = sortByFavourites ? "favouriteCount"
-                : "createdAt";
-        final Sort sort = Sort.by(Sort.Direction.DESC, sortedColumn);
+        final Sort sort = sortByFavourites ? SORT_BY_FAVOURITE
+                : DEFAULT_SORT;
         final Pageable pageable = PageRequest.of(page, size, sort);
         final Page<City> cityPage = cityService.findAll(pageable);
         return cityPage.map(cityDTOConverter::convertFromDomain);
