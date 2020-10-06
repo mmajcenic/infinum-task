@@ -10,4 +10,6 @@ public interface CityServiceFacade {
 
     Page<CityDTO> getAllCities(boolean sortByFavourites, int page, int size);
 
+    CityDTO getById(Long id);
+
 }

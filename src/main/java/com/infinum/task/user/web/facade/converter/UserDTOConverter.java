@@ -28,6 +28,7 @@ public class UserDTOConverter implements DTOConverter<User, UserDTO> {
                 .orElseGet(ArrayList::new);
 
         return UserDTO.builder()
+                .id(entity.getId())
                 .email(entity.getEmail())
                 .favouriteCities(cityDTOList)
                 .build();
@@ -41,6 +42,7 @@ public class UserDTOConverter implements DTOConverter<User, UserDTO> {
                         .collect(Collectors.toCollection(ArrayList::new)))
                 .orElseGet(ArrayList::new);
         return User.builder()
+                .id(dto.getId())
                 .email(dto.getEmail())
                 .favouriteCities(cityList)
                 .build();

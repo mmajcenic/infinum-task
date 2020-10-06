@@ -48,4 +48,9 @@ public class CityServiceFacadeImpl implements CityServiceFacade {
         return cityPage.map(cityDTOConverter::convertFromDomain);
     }
 
+    @Override
+    public CityDTO getById(final Long id) {
+        return cityDTOConverter.convertFromDomain(cityService.findById(id));
+    }
+
 }

@@ -2,6 +2,7 @@ package com.infinum.task.user.web.facade.impl;
 
 import com.infinum.task.city.model.City;
 import com.infinum.task.city.repository.facade.CityRepositoryFacade;
+import com.infinum.task.security.exception.UserNotFoundException;
 import com.infinum.task.security.model.TokenAuthenticatedUser;
 import com.infinum.task.security.model.UserCredentials;
 import com.infinum.task.security.service.TokenService;
@@ -55,6 +56,12 @@ public class UserServiceFacadeImpl implements UserServiceFacade {
         final User user = getUserFromSecurityContext();
         final City city = cityRepositoryFacade.getById(cityId);
         return userDTOConverter.convertFromDomain(userService.removeFavouriteCity(user, city));
+    }
+
+    @Override
+    public UserDTO getById(final Long id) {
+        return userDTOConverter.convertFromDomain(userRepositoryFacade.findById(id)
+                .orElseThrow(UserNotFoundException::new));
     }
 
     private User getUserFromSecurityContext() {

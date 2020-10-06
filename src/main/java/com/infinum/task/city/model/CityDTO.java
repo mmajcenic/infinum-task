@@ -1,24 +1,24 @@
 package com.infinum.task.city.model;
 
-import com.infinum.task.shared.PersistenceEntity;
+import com.infinum.task.shared.DataEntity;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
 import org.springframework.hateoas.RepresentationModel;
 
 @EqualsAndHashCode(callSuper = true)
 @Builder
-@Value
-public class CityDTO extends RepresentationModel<CityDTO> implements PersistenceEntity {
+@Data
+public class CityDTO extends RepresentationModel<CityDTO> implements DataEntity {
 
-    Long id;
+    private Long id;
 
-    String name;
+    private String name;
 
-    String description;
+    private String description;
 
-    Integer population;
+    private Integer population;
 
-    Integer favouriteCount;
+    private Integer favouriteCount;
 
 }

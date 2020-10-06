@@ -14,4 +14,6 @@ public interface UserServiceFacade {
 
     UserDTO removeFavouriteCity(Long cityId);
 
+    UserDTO getById(Long id);
+
 }
